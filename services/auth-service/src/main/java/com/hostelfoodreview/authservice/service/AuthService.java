@@ -1,8 +1,10 @@
 package com.hostelfoodreview.authservice.service;
 
+import com.hostelfoodreview.authservice.dto.AuthResponse;
 import com.hostelfoodreview.authservice.entity.Role;
 import com.hostelfoodreview.authservice.entity.User;
 import com.hostelfoodreview.authservice.repository.UserRepository;
+import com.hostelfoodreview.authservice.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +13,12 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     public User signup(String name, String email, String password) {
@@ -32,19 +36,19 @@ public class AuthService {
         newUser.setRole(Role.STUDENT);
 
         return userRepository.save(newUser);
-
     }
 
-    public User login(String email, String password){
+    public AuthResponse login(String email, String password) {
 
         User user = userRepository.findByEmail(email)
-                    .orElseThrow( () -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
-        if(!passwordEncoder.matches(password, user.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
-        return user;          
+
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().toString());
+
+        return new AuthResponse(token, user.getEmail(), user.getName(), user.getRole().toString());
     }
 }
-
-
