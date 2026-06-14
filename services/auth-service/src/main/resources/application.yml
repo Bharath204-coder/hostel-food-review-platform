@@ -1,3 +1,27 @@
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/auth_db
+    username: authuser
+    password: authpass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: Asia/Kolkata
+
+server:
+  port: 8081
+
 jwt:
   secret: your-super-long-random-secret-key-min-256-bits-change-this-in-production-xyz123
-  expiration: 86400000   # 24 hours in milliseconds
+  expiration: 86400000
